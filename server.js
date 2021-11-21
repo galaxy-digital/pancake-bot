@@ -140,7 +140,7 @@ const sellOrder_1 = async (amount,n)=>{
     let nonce = n;
     var path=[];
     path[0] = SignedAtariContract.address;
-    path[1] = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
+    path[1] = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
     var date= new Date();
     var seconds = Math.floor(date.getTime() / 1000)+1000000;
   
