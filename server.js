@@ -130,7 +130,7 @@ const sellOrder = async (amount,n)=>{
     nonce++;
   }
   
-  tx = await SignedUniswapRouterContract.swapExactTokensForETH(amount,0,path,adminaccount.publicKey,seconds,{nonce:nonce,gasLimit:160000})
+  tx = await SignedUniswapRouterContract.swapExactTokensForETH(amount,0,path,adminaccount.publicKey,seconds,{nonce:nonce,gasLimit:200000})
   if(tx!=null)
     console.log(await tx.wait())
 }
