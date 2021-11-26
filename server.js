@@ -131,7 +131,7 @@ const sellOrder = async (amount, n) => {
 	try {
 		var reversed = await UniswapPairContract.getReserves();
 		price = ethers.utils.formatUnits(reversed[0]) / ethers.utils.formatUnits(reversed[1], 0);
-		var MinAmount = ethers.utils.parseUnits((amount*price * 0.9).toFixed(0));
+		var MinAmount = ethers.utils.parseUnits((amount*price * 0.95).toFixed(0));
 		tx = await SignedUniswapRouterContract.swapExactTokensForETH(amount, MinAmount, path, adminaccount.publicKey, seconds, { nonce: nonce, gasLimit: 200000 })
 		if (tx != null)
 			console.log(await tx.wait());
