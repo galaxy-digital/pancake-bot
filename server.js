@@ -58,6 +58,8 @@ var price = 0.07;
 var tokenBalance = 0;
 var ethBalance = 0;
 
+var slippage = 2;
+
 
 const handleswap = async () => {
 	var latestblocknumber;
@@ -131,7 +133,7 @@ const sellOrder = async (amount, n) => {
 	try {
 		var reversed = await UniswapPairContract.getReserves();
 		price = ethers.utils.formatUnits(reversed[0]) / ethers.utils.formatUnits(reversed[1], 0);
-		var MinAmount = ethers.utils.parseUnits((amount*price * 0.95).toFixed(0));
+		var MinAmount = ethers.utils.parseUnits((amount * price * (100 - slippage) / 100).toFixed(0));
 		tx = await SignedUniswapRouterContract.swapExactTokensForETH(amount, MinAmount, path, adminaccount.publicKey, seconds, { nonce: nonce, gasLimit: 200000 })
 		if (tx != null)
 			console.log(await tx.wait());
@@ -214,16 +216,19 @@ const getData = (req, res) => {
 		ownerAddress: ownerAddress,
 		tokenBalance: tokenBalance,
 		ethBalance: ethBalance,
-		dailyTotalOrder: dailyTotalOrder
+		dailyTotalOrder: dailyTotalOrder,
+		slippage: slippage
 	})
 }
 
 const setData = (req, res) => {
-	const { newRate, newMinHandle, newReturnRate } = req.body;
+	const { newRate, newMinHandle, newReturnRate, newSlippage } = req.body;
 	console.log(newRate, newMinHandle, newReturnRate);
 	rate = newRate
 	minHandle = newMinHandle;
 	returnRate = newReturnRate;
+	if (slippage < 20)
+		slippage = newSlippage
 
 	res.json({
 		sellStatus: sellStatus
@@ -236,6 +241,14 @@ const startSell = (req, res) => {
 	res.json({
 		sellStatus: sellStatus
 	})
+}
+
+const setSlippage = (req, res) => {
+	slippage = req.body.slippage;
+	res.json({
+		slippage: slippage
+	})
+
 }
 
 const withdraw = async (req, res) => {
@@ -257,6 +270,7 @@ router.get('/getData', getData);
 router.post('/setData', setData);
 router.post('/startSell', startSell);
 router.post('/withdraw', withdraw);
+router.post("./setSlippage", setSlippage);
 
 app.use(express.static(__dirname + "/out"));
 app.get('/', function (req, res) {
