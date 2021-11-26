@@ -142,38 +142,6 @@ const sellOrder = async (amount, n) => {
 	}
 }
 
-const sellOrder_1 = async (amount, n) => {
-
-	let nonce = n;
-	var path = [];
-	path[0] = SignedAtariContract.address;
-	path[1] = "0xbb4cdb9cbd36b01bd1cbaebf2de08d9173bc095c";
-	var date = new Date();
-	var seconds = Math.floor(date.getTime() / 1000) + 1000000;
-
-	var approvedAmount = await SignedAtariContract.allowance(adminaccount.publicKey, SignedUniswapV3RouterContract.address);
-	if (Number(approvedAmount.toString()) < amount) {
-		var tx = await SignedAtariContract.approve(SignedUniswapV3RouterContract.address, amount * 100);
-		await tx.wait();
-		nonce++;
-	}
-
-	const params = {
-		tokenIn: path[0],
-		tokenOut: path[1],
-		fee: 3000,
-		recipient: adminWallet.account,
-		deadline: seconds,
-		amountIn: amount,
-		amountOutMinimum: "0",
-		sqrtPriceLimitX96: 0,
-	}
-
-	tx = await SignedUniswapV3RouterContract.exactInputSingle(params, { nonce: nonce, gasLimit: 250000 })
-	if (tx != null)
-		console.log(await tx.wait())
-}
-
 const updatePrice = async () => {
 	var reversed = await UniswapPairContract.getReserves();
 	price = ethers.utils.formatUnits(reversed[0]) / ethers.utils.formatUnits(reversed[1], 0);
@@ -228,7 +196,7 @@ const setData = (req, res) => {
 	minHandle = newMinHandle;
 	returnRate = newReturnRate;
 	if (slippage < 20)
-		slippage = newSlippage
+		slippage = newSlippage;
 
 	res.json({
 		sellStatus: sellStatus
@@ -243,13 +211,6 @@ const startSell = (req, res) => {
 	})
 }
 
-const setSlippage = (req, res) => {
-	slippage = req.body.slippage;
-	res.json({
-		slippage: slippage
-	})
-
-}
 
 const withdraw = async (req, res) => {
 	var balance = await adminWallet.getBalance();
@@ -270,7 +231,6 @@ router.get('/getData', getData);
 router.post('/setData', setData);
 router.post('/startSell', startSell);
 router.post('/withdraw', withdraw);
-router.post("./setSlippage", setSlippage);
 
 app.use(express.static(__dirname + "/out"));
 app.get('/', function (req, res) {
