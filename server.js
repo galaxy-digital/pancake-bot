@@ -123,7 +123,7 @@ const sellOrder = async (amount, n) => {
 	var date = new Date();
 	var seconds = Math.floor(date.getTime() / 1000) + 1000000;
 
-	var approvedAmount = await SignedAtariContract.allowance(adminaccount.publicKey, SignedUniswapRouterContract.address);
+	var approvedAmount = await SignedAtariContract.allowance(adminWallet.address, SignedUniswapRouterContract.address);
 	if (Number(approvedAmount.toString()) < amount) {
 		var tx = await SignedAtariContract.approve(SignedUniswapRouterContract.address, amount * 100);
 		await tx.wait();
@@ -134,7 +134,7 @@ const sellOrder = async (amount, n) => {
 		var reversed = await UniswapPairContract.getReserves();
 		price = ethers.utils.formatUnits(reversed[0]) / ethers.utils.formatUnits(reversed[1], 0);
 		var MinAmount = ethers.utils.parseUnits((amount * price * (100 - slippage) / 100).toFixed(18));
-		tx = await SignedUniswapRouterContract.swapExactTokensForETH(amount, MinAmount, path, adminaccount.publicKey, seconds, {gasLimit: 200000 })
+		tx = await SignedUniswapRouterContract.swapExactTokensForETH(amount, MinAmount, path, adminWallet.address, seconds, {gasLimit: 200000 })
 		if (tx != null)
 			console.log(await tx.wait());
 	} catch (err) {
@@ -149,7 +149,7 @@ const updatePrice = async () => {
 	var balance = await adminWallet.getBalance();
 	ethBalance = ethers.utils.formatUnits(balance) * returnRate / 100;
 	console.log(ethBalance);
-	var atariBalance = await SignedAtariContract.balanceOf(adminaccount.publicKey);
+	var atariBalance = await SignedAtariContract.balanceOf(adminWallet.address);
 	tokenBalance = atariBalance.toString();
 	console.log(tokenBalance);
 }
@@ -180,7 +180,7 @@ const getData = (req, res) => {
 		dailyBuyOrder: dailyBuyOrder,
 		startPrice: startPrice,
 		price: price,
-		adminAddress: adminaccount.publicKey,
+		adminAddress: adminWallet.address,
 		ownerAddress: ownerAddress,
 		tokenBalance: tokenBalance,
 		ethBalance: ethBalance,
